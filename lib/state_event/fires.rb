@@ -1,5 +1,3 @@
-# Note: Brian changed to always tie this to a state change and other optimizations
-
 module StateEvent
   module Fires
     def self.included(klass)
@@ -10,7 +8,7 @@ module StateEvent
       def aasm_state_fires(state, opts)
         aasm_state state
         
-        if_name = :"timeline_if_#{state}_changed"
+        if_name = :"state_event_if_#{state}_changed"
         event_type = opts[:event_type] ? opts[:event_type] : "#{self.name.underscore}_#{state}"
         opts[:on] ||= :save
 
@@ -18,7 +16,7 @@ module StateEvent
         opts[:if] = if_name
 
         define_method(if_name) do
-          if state_changed? and not suppress_timeline_events?
+          if state_changed? and not suppress_state_events?
             if send(:"#{state}?")
               #puts "              state changed"
               state_changed = false
@@ -33,20 +31,20 @@ module StateEvent
       end
       
       
-      def acts_as_aasm_timeline(opts={})
+      def acts_as_aasm_object(opts={})
         unless opts.has_key?(:no_state)
           include AASM
           aasm_column :state
         end
 
-        define_method(:suppress_timeline_events) do
-          @suppress_timeline_events = true
+        define_method(:suppress_state_events) do
+          @suppress_state_events = true
         end
-        define_method(:enabled_timeline_events) do
-          @suppress_timeline_events = false
+        define_method(:enable_state_events) do
+          @suppress_state_events = false
         end
-        define_method(:suppress_timeline_events?) do
-          !!@suppress_timeline_events
+        define_method(:suppress_state_events?) do
+          !!@suppress_state_events
         end
 
 
@@ -104,12 +102,6 @@ module StateEvent
           end
           create_options[:event_type] = event_type.to_s
  
-          # sniff the city: now done in TimelineEvent
-          #find_city_if_needed(create_options, :subject)
-          #find_city_if_needed(create_options, :secondary_subject)
-          #find_city_if_needed(create_options, :actor)
-          #find_city_if_needed(create_options, :observer)
-
           created_event = TimelineEvent.create!(create_options)
 
           # callback if there is another one
@@ -121,10 +113,7 @@ module StateEvent
               send(cb)
             end
           end
-          
-          
-          
-          
+
           true
         end
  
