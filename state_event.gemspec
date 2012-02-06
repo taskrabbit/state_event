@@ -20,7 +20,12 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'aasm', '2.1.4'
 
+  s.add_development_dependency 'rspec', '1.3.0'
+  s.add_development_dependency 'rspec-rails', '1.3.2'
+  s.add_development_dependency 'active_record_base_without_table', '0.1.1'
+  s.add_development_dependency 'mocha', '0.9.8'
+  
   # specify any dependencies here; for example:
-  # s.add_development_dependency "rspec"
+  # 
   # s.add_runtime_dependency "rest-client"
 end

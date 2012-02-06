@@ -30,6 +30,9 @@ module StateEvent
         fires(event_type, opts)
       end
       
+      def acts_as_state_event(opts={})
+        ::StateEvent::Config.event_class = self
+      end
       
       def acts_as_aasm_object(opts={})
         unless opts.has_key?(:no_state)
@@ -102,7 +105,7 @@ module StateEvent
           end
           create_options[:event_type] = event_type.to_s
  
-          created_event = TimelineEvent.create!(create_options)
+          created_event = ::StateEvent::Config.event_class.create!(create_options)
 
           # callback if there is another one
           if opts.has_key?(:callback)
