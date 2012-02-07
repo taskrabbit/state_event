@@ -8,11 +8,11 @@ module StateEvent
       def aasm_state_fires(state, opts)
         aasm_state state  # define the state
         
-        if_name = :"state_event_if_#{state}_changed"
+        if_name = "state_event_if_#{state}_changed"
         define_method(if_name) do
           return false unless state_changed?
           return false if try(:suppress_state_events?)
-          send(:"#{state}?")
+          send("#{state}?")
         end
 
         opts[:subject] ||= :self
@@ -21,7 +21,7 @@ module StateEvent
         event_type ||= "#{self.name.underscore}_#{state}"
         
  
-        method_name = :"fire_#{event_type}_after_save"
+        method_name = "fire_#{event_type}_after_save"
         define_method(method_name) do
           create_options = {}
           opts.each do |key, value|
@@ -79,14 +79,14 @@ module StateEvent
         end
 
         if opts.has_key?(:time)
-          method_name = :"default_event_time"
+          method_name = "default_event_time"
           define_method(method_name) do
             return send(opts[:time])
           end
         end
         
         if opts.has_key?(:actor)
-          method_name = :"default_event_actor"
+          method_name = "default_event_actor"
           define_method(method_name) do
             return self if opts[:actor] == :self
             return nil if opts[:actor] == false
