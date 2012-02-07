@@ -1,5 +1,6 @@
 require "aasm"
 require "state_event/version"
+require "state_event/util"
 require "state_event/config"
 require "state_event/object"
 require "state_event/event"

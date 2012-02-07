@@ -40,25 +40,10 @@ module StateEvent
         
         method_name = "fire_#{event_type}_after_save"
         define_method(method_name) do
-          create_options = {}
-          opts.each do |key, value|
-            sym = key.to_sym
-            case value
-            when :self
-              create_options[sym] = self
-            when true
-              create_options[sym] = true
-            when false
-              create_options[sym] = false
-            when nil
-              create_options[sym] = nil
-            else
-              create_options[sym] = send(value)
-            end
-          end
+          create_options = Util.get_event_hash(self, opts)
           create_options[:event_type] = event_type
           
-          created_event = ::StateEvent::Config.event_class.create!(create_options)
+          created_event = Config.event_class.create!(create_options)
 
           # callback if there is one
           if callback
