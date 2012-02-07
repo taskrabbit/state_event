@@ -11,19 +11,10 @@ module StateEvent
         if_name = :"state_event_if_#{state}_changed"
         event_type = opts[:event_type] ? opts[:event_type] : "#{self.name.underscore}_#{state}"
 
-        cached_if = opts[:if]
-        opts[:if] = if_name
-
         define_method(if_name) do
-          if state_changed? and not suppress_state_events?
-            if send(:"#{state}?")
-              #puts "              state changed"
-              state_changed = false
-              # see if something additional in options
-              return cached_if ? send(cached_if.to_s) : true
-            end
-          end
-          return false
+          return false unless state_changed?
+          return false if try(:suppress_state_events?)
+          send(:"#{state}?")
         end
 
         opts[:subject] = :self unless opts.has_key?(:subject)
@@ -60,7 +51,7 @@ module StateEvent
           true
         end
  
-        after_save method_name, :if => opts[:if]
+        after_save method_name, :if => if_name
       end
       
       def acts_as_state_event(opts={})
