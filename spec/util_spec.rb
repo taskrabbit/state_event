@@ -4,6 +4,10 @@ class TestUtil1 < ActiveRecord::BaseWithoutTable
   def foo
     "bar"
   end
+  
+  def mult
+    4*5
+  end
 end
 
 describe StateEvent::Util do
@@ -20,8 +24,9 @@ describe StateEvent::Util do
     
     it "should work for different types of properties" do
       test = TestUtil1.new
-      out = StateEvent::Util.get_event_hash(test, {:ok => :foo, :thing => :self, :more => true, :bad => false, :none => nil})
-      out.should == {:ok => "bar", :thing => test, :more => true, :bad => false, :none => nil}
+      out = StateEvent::Util.get_event_hash(test, {:ok => :foo, :thing => :self, :more => true, 
+        :bad => false, :none => nil, :mult => Proc.new {|m| m.mult}, :val => "nice"})
+      out.should == {:ok => "bar", :thing => test, :more => true, :bad => false, :none => nil, :mult => 20, :val => "nice"}
     end
   end
 end

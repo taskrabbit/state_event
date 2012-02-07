@@ -6,17 +6,14 @@ module StateEvent
       out = {}
       opts.each do |key, value|
         sym = key.to_sym
-        case value
-        when :self
+        if value == :self
           out[sym] = object
-        when true
-          out[sym] = true
-        when false
-          out[sym] = false
-        when nil
-          out[sym] = nil
-        else
+        elsif value.is_a? Symbol
           out[sym] = object.send(value)
+        elsif value.respond_to?(:call)
+          out[sym] = value.call(object)
+        else
+          out[sym] = value
         end
       end
       out
