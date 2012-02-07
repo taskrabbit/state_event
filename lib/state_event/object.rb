@@ -3,6 +3,18 @@ module StateEvent
     def self.included(klass)
       klass.send(:extend, ClassMethods)
     end
+    
+    module InstanceMethods
+      protected
+      
+      def update_dynamic_state_changed_at
+        time = Time.now
+        ["state_changed_at", "#{state}_state_at"].each do |attribute|
+          send("#{attribute}=", time) if has_attribute?(attribute)
+        end
+        true
+      end
+    end
  
     module ClassMethods
       def acts_as_aasm_object(initial=nil, opts={})
@@ -12,6 +24,9 @@ module StateEvent
           aasm_initial_state initial
         end
 
+        include InstanceMethods
+        before_save :update_dynamic_state_changed_at, :if => :state_changed?
+        
         if opts.has_key?(:time)
           method_name = :default_event_time
           define_method(method_name) do
@@ -26,16 +41,6 @@ module StateEvent
             return nil if opts[:actor] == false
             return send(opts[:actor])
           end
-        end
-
-        time_name = :update_dynamic_state_changed_at
-        send(:before_save, time_name, :if => :state_changed?)
-        define_method(time_name) do
-          time = Time.now
-          ["state_changed_at", "#{state}_state_at"].each do |attribute|
-            send("#{attribute}=", time) if has_attribute?(attribute)
-          end
-          true
         end
       end
     end

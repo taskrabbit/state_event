@@ -20,6 +20,18 @@ class TestObject1 < ActiveRecord::BaseWithoutTable
 
 end
 
+class TestObject2 < ActiveRecord::BaseWithoutTable
+  column :state, :string
+  column :first_state_at, :datetime
+  
+  acts_as_aasm_object :first, :actor => :foo
+  aasm_state :first
+  
+  def foo
+    "bar"
+  end
+end
+
 describe "Object state interactions" do
   it "should set the initial state" do
     test = TestObject1.new
@@ -39,7 +51,7 @@ describe "Object state interactions" do
     end
   end
   
-  it "should set event timestamps when there" do
+  it "should set named event timestamps when there" do
     Timecop.freeze do
       test = TestObject1.new
       test.mark_second
@@ -48,6 +60,15 @@ describe "Object state interactions" do
       test.save.should be_true
       test.second_state_at.should == Time.now
       test.state_changed_at.should == Time.now
+    end
+  end
+  
+  it "should set the time on the first state" do
+    Timecop.freeze do
+      test = TestObject2.new
+      test.first_state_at.should be_nil
+      test.save.should be_true
+      test.first_state_at.should == Time.now
     end
   end
 end
