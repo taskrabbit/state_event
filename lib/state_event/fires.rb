@@ -6,11 +6,10 @@ module StateEvent
  
     module ClassMethods
       def aasm_state_fires(state, opts)
-        aasm_state state
+        aasm_state state  # define the state
         
         if_name = :"state_event_if_#{state}_changed"
         event_type = opts[:event_type] ? opts[:event_type] : "#{self.name.underscore}_#{state}"
-        opts[:on] ||= :save
 
         cached_if = opts[:if]
         opts[:if] = if_name
@@ -77,18 +76,10 @@ module StateEvent
       end
 
       def fires(event_type, opts)
-
-        raise ArgumentError, "Argument :on is mandatory" unless opts.has_key?(:on)
- 
-        # Array provided, set multiple callbacks
-        if opts[:on].kind_of?(Array)
-          opts[:on].each { |on| fires(event_type, opts.merge({:on => on})) }
-          return
-        end
  
         opts[:subject] = :self unless opts.has_key?(:subject)
  
-        method_name = :"fire_#{event_type}_after_#{opts[:on]}"
+        method_name = :"fire_#{event_type}_after_save"
         define_method(method_name) do
           create_options = [:actor, :observer, :subject, :secondary_subject, :private, :admin, :city, :private_runner].inject({}) do |memo, sym|
             case opts[sym]
@@ -120,7 +111,7 @@ module StateEvent
           true
         end
  
-        send(:"after_#{opts[:on]}", method_name, :if => opts[:if])
+        after_save method_name, :if => opts[:if]
       end
     end
   end
