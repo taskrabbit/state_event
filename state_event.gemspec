@@ -24,6 +24,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rspec-rails', '1.3.2'
   s.add_development_dependency 'active_record_base_without_table', '0.1.1'
   s.add_development_dependency 'mocha', '0.9.8'
+  s.add_development_dependency 'timecop', '0.3.4'
   
   # specify any dependencies here; for example:
   # 
