@@ -95,10 +95,12 @@ module StateEvent
           end
         end
 
-        update_attr = :state_changed_at
-        send("before_save", "update_#{update_attr}", :if => :state_changed?)
-        define_method("update_#{update_attr}") do
-          send("#{update_attr}=", Time.now) if has_attribute?(update_attr)
+        send("before_save", "update_dynamic_state_changed_at", :if => :state_changed?)
+        define_method("update_dynamic_state_changed_at") do
+          time = Time.now
+          ["state_changed_at", "#{state}_state_at"].each do |attribute|
+            send("#{attribute}=", time) if has_attribute?(attribute)
+          end
           true
         end
       end
