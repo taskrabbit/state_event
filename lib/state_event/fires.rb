@@ -9,42 +9,47 @@ module StateEvent
         aasm_state state  # define the state
         
         if_name = :"state_event_if_#{state}_changed"
-        event_type = opts[:event_type] ? opts[:event_type] : "#{self.name.underscore}_#{state}"
-
         define_method(if_name) do
           return false unless state_changed?
           return false if try(:suppress_state_events?)
           send(:"#{state}?")
         end
 
-        opts[:subject] = :self unless opts.has_key?(:subject)
+        opts[:subject] ||= :self
+        
+        event_type = opts.delete(:event_type)
+        event_type ||= "#{self.name.underscore}_#{state}"
  
         method_name = :"fire_#{event_type}_after_save"
         define_method(method_name) do
-          create_options = [:actor, :observer, :subject, :secondary_subject, :private, :admin, :city, :private_runner].inject({}) do |memo, sym|
-            case opts[sym]
+          callback = opts.delete(:callback)
+          
+          create_options = {}
+          opts.each do |key, value|
+            sym = key.to_sym
+            case value
             when :self
-              memo[sym] = self
+              create_options[sym] = self
             when true
-              memo[sym] = true
+              create_options[sym] = true
             when false
-              memo[sym] = false
+              create_options[sym] = false
+            when nil
+              create_options[sym] = nil
             else
-              memo[sym] = send(opts[sym]) if opts[sym]
+              create_options[sym] = send(value)
             end
-            memo
           end
-          create_options[:event_type] = event_type.to_s
- 
+          create_options[:event_type] = event_type
+          
           created_event = ::StateEvent::Config.event_class.create!(create_options)
 
           # callback if there is another one
-          if opts.has_key?(:callback)
-            cb = opts[:callback]
-            if method(cb).arity == 1
-              send(cb, created_event)
+          if callback
+            if method(callback).arity == 1
+              send(callback, created_event)
             else
-              send(cb)
+              send(callback)
             end
           end
 
