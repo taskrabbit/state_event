@@ -16,14 +16,13 @@ module StateEvent
         end
 
         opts[:subject] ||= :self
-        
+        callback = opts.delete(:callback)
         event_type = opts.delete(:event_type)
         event_type ||= "#{self.name.underscore}_#{state}"
+        
  
         method_name = :"fire_#{event_type}_after_save"
         define_method(method_name) do
-          callback = opts.delete(:callback)
-          
           create_options = {}
           opts.each do |key, value|
             sym = key.to_sym
