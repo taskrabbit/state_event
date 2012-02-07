@@ -5,20 +5,11 @@ module StateEvent
     end
  
     module ClassMethods
-      def acts_as_aasm_object(opts={})
-        unless opts.has_key?(:no_state)
-          include AASM
-          aasm_column :state
-        end
-
-        define_method(:suppress_state_events) do
-          @suppress_state_events = true
-        end
-        define_method(:enable_state_events) do
-          @suppress_state_events = false
-        end
-        define_method(:suppress_state_events?) do
-          !!@suppress_state_events
+      def acts_as_aasm_object(initial=nil, opts={})
+        include AASM
+        aasm_column :state
+        if initial and not initial == :none
+          aasm_initial_state initial
         end
 
         if opts.has_key?(:time)

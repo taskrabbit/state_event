@@ -5,9 +5,8 @@ class TestObject1 < ActiveRecord::BaseWithoutTable
   column :state_changed_at, :datetime
   column :second_state_at, :datetime
   
-  acts_as_aasm_object :actor => :foo
+  acts_as_aasm_object :first, :actor => :foo
   
-  aasm_initial_state :first
   aasm_state_fires :first, :actor => :foo
   aasm_state_fires :second, :actor => :foo
   
@@ -22,6 +21,13 @@ class TestObject1 < ActiveRecord::BaseWithoutTable
 end
 
 describe "Object state interactions" do
+  it "should set the initial state" do
+    test = TestObject1.new
+    test.state.should be_nil
+    test.should be_first
+    test.should_not be_second
+  end
+  
   it "should set state_changed_at when there" do
     Timecop.freeze do
       test = TestObject1.new

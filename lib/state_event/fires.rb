@@ -4,9 +4,32 @@ module StateEvent
       klass.send(:extend, ClassMethods)
     end
  
+    module InstanceMethods
+      def suppress_state_events
+        @suppress_state_events = true
+      end
+      
+      def enable_state_events
+        @suppress_state_events = false
+      end
+      
+      def suppress_state_events?
+        !!@suppress_state_events
+      end
+    end
+ 
     module ClassMethods
       def aasm_state_fires(state, opts)
+        unless method_defined?(:suppress_state_events?)
+          send(:include, InstanceMethods)
+        end
+        
         aasm_state state  # define the state
+        
+        opts[:subject] ||= :self
+        callback = opts.delete(:callback)
+        event_type = opts.delete(:event_type)
+        event_type ||= "#{self.name.underscore}_#{state}"
         
         if_name = "state_event_if_#{state}_changed"
         define_method(if_name) do
@@ -14,13 +37,7 @@ module StateEvent
           return false if try(:suppress_state_events?)
           send("#{state}?")
         end
-
-        opts[:subject] ||= :self
-        callback = opts.delete(:callback)
-        event_type = opts.delete(:event_type)
-        event_type ||= "#{self.name.underscore}_#{state}"
         
- 
         method_name = "fire_#{event_type}_after_save"
         define_method(method_name) do
           create_options = {}
@@ -43,7 +60,7 @@ module StateEvent
           
           created_event = ::StateEvent::Config.event_class.create!(create_options)
 
-          # callback if there is another one
+          # callback if there is one
           if callback
             if method(callback).arity == 1
               send(callback, created_event)
@@ -56,53 +73,6 @@ module StateEvent
         end
  
         after_save method_name, :if => if_name
-      end
-      
-      def acts_as_state_event(opts={})
-        ::StateEvent::Config.event_class = self
-      end
-      
-      def acts_as_aasm_object(opts={})
-        unless opts.has_key?(:no_state)
-          include AASM
-          aasm_column :state
-        end
-
-        define_method(:suppress_state_events) do
-          @suppress_state_events = true
-        end
-        define_method(:enable_state_events) do
-          @suppress_state_events = false
-        end
-        define_method(:suppress_state_events?) do
-          !!@suppress_state_events
-        end
-
-        if opts.has_key?(:time)
-          method_name = :default_event_time
-          define_method(method_name) do
-            return send(opts[:time])
-          end
-        end
-        
-        if opts.has_key?(:actor)
-          method_name = :default_event_actor
-          define_method(method_name) do
-            return self if opts[:actor] == :self
-            return nil if opts[:actor] == false
-            return send(opts[:actor])
-          end
-        end
-
-        time_name = :update_dynamic_state_changed_at
-        send(:before_save, time_name, :if => :state_changed?)
-        define_method(time_name) do
-          time = Time.now
-          ["state_changed_at", "#{state}_state_at"].each do |attribute|
-            send("#{attribute}=", time) if has_attribute?(attribute)
-          end
-          true
-        end
       end
     end
   end

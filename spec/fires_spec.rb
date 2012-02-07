@@ -12,7 +12,8 @@ class TestFires1 < ActiveRecord::BaseWithoutTable
   column :state, :string
   column :other, :string
   
-  acts_as_aasm_object :actor => :foo
+  include AASM
+  aasm_column :state
   
   aasm_initial_state :first
   aasm_state_fires :first, :actor => :foo, :callback => :cache_event
