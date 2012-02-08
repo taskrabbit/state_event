@@ -26,10 +26,7 @@ module StateEvent
         
         aasm_state state  # define the state
         
-        opts[:subject] ||= :self
         callback = opts.delete(:callback)
-        event_type = opts.delete(:event_type)
-        event_type ||= "#{self.name.underscore}_#{state}"
         
         if_name = "state_event_if_#{state}_changed"
         define_method(if_name) do
@@ -38,12 +35,9 @@ module StateEvent
           send("#{state}?")
         end
         
-        method_name = "fire_#{event_type}_after_save"
+        method_name = "fire_#{state}_state_after_save"
         define_method(method_name) do
-          create_options = Util.get_event_hash(self, opts)
-          create_options[:event_type] = event_type
-          
-          created_event = Config.event_class.create!(create_options)
+          created_event = Util.create_event(self, opts, state)
 
           # callback if there is one
           if callback

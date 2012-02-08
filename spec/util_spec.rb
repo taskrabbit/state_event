@@ -11,11 +11,12 @@ class TestUtil1 < ActiveRecord::BaseWithoutTable
 end
 
 describe StateEvent::Util do
+  
   describe ".get_event_hash" do
     it "should call object to get values" do
       test = TestUtil1.new
       out = StateEvent::Util.get_event_hash(test, {:ok => :foo})
-      out.should == {:ok => "bar"}
+      out.should == {:subject => test, :ok => "bar"}
     end
     
     it "should raise event if method not known" do
@@ -26,7 +27,15 @@ describe StateEvent::Util do
       test = TestUtil1.new
       out = StateEvent::Util.get_event_hash(test, {:ok => :foo, :thing => :self, :more => true, 
         :bad => false, :none => nil, :mult => Proc.new {|m| m.mult}, :val => "nice"})
-      out.should == {:ok => "bar", :thing => test, :more => true, :bad => false, :none => nil, :mult => 20, :val => "nice"}
+      out.should == {:subject => test, :ok => "bar", :thing => test, 
+        :more => true, :bad => false, :none => nil, :mult => 20, :val => "nice"}
+    end
+    
+    it "should accept subject and event_type in hash" do
+      test = TestUtil1.new
+      other = TestUtil1.new
+      out = StateEvent::Util.get_event_hash(test, {:ok => :foo, :subject => other, :event_type => "whatever"})
+      out.should == {:subject => other, :event_type => "whatever", :ok => "bar"}
     end
   end
 end

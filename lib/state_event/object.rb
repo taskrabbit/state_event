@@ -5,6 +5,30 @@ module StateEvent
     end
     
     module InstanceMethods
+      
+      def default_aasm_event(opts = {})
+        clazz = Config.event_class
+        return nil unless clazz
+
+        Util.default_event(self, self.class.default_aasm_options.symbolize_keys)        
+      end
+      
+      def create_aasm_event(state, options={})
+        clazz = Config.event_class
+        return nil unless clazz
+        hash = self.class.default_aasm_options.symbolize_keys.merge(options.symbolize_keys)
+        hash.delete(:time)
+        Util.create_event(self, hash, state)
+      end
+      
+      def build_aasm_event(state, options={})
+        clazz = Config.event_class
+        return nil unless clazz
+        hash = self.class.default_aasm_options.symbolize_keys.merge(options.symbolize_keys)
+        hash.delete(:time)
+        Util.build_event(self, hash, state)
+      end
+      
       protected
       
       def update_dynamic_state_changed_at
@@ -17,31 +41,20 @@ module StateEvent
     end
  
     module ClassMethods
+      def default_aasm_options
+        @default_aasm_options
+      end
       def acts_as_aasm_object(initial=nil, opts={})
-        include AASM
-        aasm_column :state
         if initial and not initial == :none
-          aasm_initial_state initial
+          include AASM
+          aasm_column :state
+          aasm_initial_state initial unless initial == :defer
         end
 
         include InstanceMethods
         before_save :update_dynamic_state_changed_at, :if => :state_changed?
         
-        if opts.has_key?(:time)
-          method_name = :default_event_time
-          define_method(method_name) do
-            return send(opts[:time])
-          end
-        end
-        
-        if opts.has_key?(:actor)
-          method_name = :default_event_actor
-          define_method(method_name) do
-            return self if opts[:actor] == :self
-            return nil if opts[:actor] == false
-            return send(opts[:actor])
-          end
-        end
+        @default_aasm_options = opts
       end
     end
   end

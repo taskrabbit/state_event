@@ -3,6 +3,12 @@ module StateEvent
     def self.included(klass)
       klass.send(:extend, ClassMethods)
     end
+    
+    module InstanceMethods
+      def default_aasm_event
+        self
+      end
+    end
  
     module ClassMethods
       def acts_as_state_event(opts={})
@@ -23,6 +29,8 @@ module StateEvent
           true
         end
         before_save default_method
+        
+        include InstanceMethods
       end
     end
   end

@@ -7,6 +7,7 @@ module StateEvent
     end
     
     def event_class
+      return nil unless @event_class_string
       @event_class_string.constantize
     end
   end

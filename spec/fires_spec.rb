@@ -1,8 +1,8 @@
 require 'spec_helper'
 
-class TestEvent < ActiveRecord::BaseWithoutTable
+class TestEvent1 < ActiveRecord::BaseWithoutTable
   acts_as_state_event
-  column :actor, :string
+  column :value, :string
   column :event_type, :string
   
   attr_accessor :subject
@@ -16,7 +16,7 @@ class TestFires1 < ActiveRecord::BaseWithoutTable
   aasm_column :state
   
   aasm_initial_state :first
-  aasm_state_fires :first, :actor => :foo, :callback => :cache_event
+  aasm_state_fires :first, :value => :foo, :callback => :cache_event
   
   def foo
     "bar"
@@ -35,15 +35,23 @@ class TestFires1 < ActiveRecord::BaseWithoutTable
 end
 
 describe "Fires Event Creation" do
+  before(:each) do
+    @saved_config = ::StateEvent::Config.event_class
+    ::StateEvent::Config.event_class = TestEvent1
+  end
+  after(:each) do
+    ::StateEvent::Config.event_class = @saved_config
+  end
   it "should call to create a TestEvent" do
     test = TestFires1.new
-    TestEvent.expects(:create!).with(:event_type => 'test_fires1_first', :subject => test, :actor => "bar")
+    TestEvent1.expects(:new).with(:event_type => 'test_fires1_first', :subject => test, :value => "bar")
+    TestEvent1.any_instance.expects(:save).returns(true)
     test.save.should be_true
   end
   
   it "should only be called once" do
     test = TestFires1.new
-    TestEvent.expects(:create!).once
+    TestEvent1.any_instance.expects(:save).returns(true)
     test.save.should be_true
     test.other = "ok"
     test.save.should be_true
@@ -51,7 +59,7 @@ describe "Fires Event Creation" do
   
   it "should skip creation when suppressed" do
     test = TestFires1.new
-    TestEvent.expects(:create!).never
+    TestEvent1.expects(:create!).never
     test.suppress_state_events
     test.save.should be_true
   end
