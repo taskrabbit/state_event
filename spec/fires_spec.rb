@@ -44,8 +44,9 @@ describe "Fires Event Creation" do
   end
   it "should call to create a TestEvent" do
     test = TestFires1.new
-    TestEvent1.expects(:new).with(:event_type => 'test_fires1_first', :subject => test, :value => "bar")
-    TestEvent1.any_instance.expects(:save).returns(true)
+    mock = TestEvent1.new
+    TestEvent1.expects(:new).with(:event_type => 'test_fires1_first', :subject => test, :value => "bar").returns(mock)
+    mock.expects(:save).returns(true)
     test.save.should be_true
   end
   

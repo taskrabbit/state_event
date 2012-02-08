@@ -46,6 +46,10 @@ class TestObject2 < ActiveRecord::BaseWithoutTable
   end
 end
 
+class TestObject3 < ActiveRecord::BaseWithoutTable
+  acts_as_aasm_object :none, :else => 42
+end
+
 describe "Object state interactions" do
   before(:each) do
     @saved_config = ::StateEvent::Config.event_class
@@ -106,6 +110,11 @@ describe "Object state interactions" do
   end
   
   describe "time recoriding" do
+    it "should be ok when there is no state column" do
+      test = TestObject3.new
+      test.save.should be_true
+    end
+    
     it "should set the initial state" do
       test = TestObject1.new
       test.state.should be_nil

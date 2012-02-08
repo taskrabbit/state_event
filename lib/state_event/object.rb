@@ -38,6 +38,10 @@ module StateEvent
         end
         true
       end
+      
+      def aasm_state_changed?
+        state_changed?
+      end
     end
  
     module ClassMethods
@@ -49,11 +53,10 @@ module StateEvent
           include AASM
           aasm_column :state
           aasm_initial_state initial unless initial == :defer
+          before_save :update_dynamic_state_changed_at, :if => :aasm_state_changed?
         end
 
         include InstanceMethods
-        before_save :update_dynamic_state_changed_at, :if => :state_changed?
-        
         @default_aasm_options = opts
       end
     end
