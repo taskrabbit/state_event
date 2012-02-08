@@ -13,6 +13,8 @@ module StateEvent
     module ClassMethods
       def acts_as_state_event(opts={})
         ::StateEvent::Config.event_class = self
+        
+        include InstanceMethods
       end
       
       def has_event_default(property,  method = nil, &block)
@@ -29,8 +31,6 @@ module StateEvent
           true
         end
         before_save default_method
-        
-        include InstanceMethods
       end
     end
   end

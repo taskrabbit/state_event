@@ -50,6 +50,14 @@ class TestObject3 < ActiveRecord::BaseWithoutTable
   acts_as_aasm_object :none, :else => 42
 end
 
+class TestObject4 < ActiveRecord::BaseWithoutTable
+  
+end
+
+class TestObject5
+  
+end
+
 describe "Object state interactions" do
   before(:each) do
     @saved_config = ::StateEvent::Config.event_class
@@ -60,6 +68,25 @@ describe "Object state interactions" do
   end
   
   describe "#default_aasm_event" do
+    it "should return itself if the state event" do
+      event = TestEvent2.new
+      event.default_aasm_event.should == event
+    end
+    it "should work on objects it's never heard of" do
+      test = TestObject4.new
+      event = test.default_aasm_event
+      event.class.should == TestEvent2
+      event.subject.should == test
+      event.event_type.should == "test_object4"
+    end
+    it "should work on objects that aren't active record" do
+      test = TestObject5.new
+      event = test.default_aasm_event
+      event.class.should == TestEvent2
+      event.subject.should == test
+      event.event_type.should == "test_object5"
+    end
+    
     it "should return a default object" do
       test = TestObject2.new
       event = test.default_aasm_event
@@ -71,7 +98,7 @@ describe "Object state interactions" do
   
     it "should allow adding of times" do
       test = TestObject2.new
-      event = test.default_aasm_event(:time => true)
+      event = test.default_aasm_event
       event.event_type.should == "test_object2"
       event.something.should == "bar"
       event.else.should == 42

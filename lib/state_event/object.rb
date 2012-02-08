@@ -5,28 +5,20 @@ module StateEvent
     end
     
     module InstanceMethods
-      
-      def default_aasm_event(opts = {})
-        clazz = Config.event_class
-        return nil unless clazz
-
-        Util.default_event(self, self.class.default_aasm_options.symbolize_keys)        
-      end
-      
       def create_aasm_event(state, options={})
-        clazz = Config.event_class
-        return nil unless clazz
         hash = self.class.default_aasm_options.symbolize_keys.merge(options.symbolize_keys)
         hash.delete(:time)
         Util.create_event(self, hash, state)
       end
       
       def build_aasm_event(state, options={})
-        clazz = Config.event_class
-        return nil unless clazz
         hash = self.class.default_aasm_options.symbolize_keys.merge(options.symbolize_keys)
         hash.delete(:time)
         Util.build_event(self, hash, state)
+      end
+      
+      def default_aasm_event
+        Util.default_event(self, self.class.default_aasm_options.symbolize_keys)        
       end
       
       protected
@@ -46,7 +38,7 @@ module StateEvent
  
     module ClassMethods
       def default_aasm_options
-        @default_aasm_options
+        @default_aasm_options || {}
       end
       def acts_as_aasm_object(initial=nil, opts={})
         if initial and not initial == :none

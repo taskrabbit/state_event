@@ -41,14 +41,14 @@ module StateEvent
       
       if out.has_attribute?(:created_at)
         out.created_at = val
-        out.created_at ||= object.created_at if object.has_attribute?(:created_at)
+        out.created_at ||= object.created_at if object.respond_to?(:has_attribute?) and object.has_attribute?(:created_at)
       end
-      
+    
       if out.has_attribute?(:udpated_at)
         out.updated_at = val
-        out.updated_at ||= object.updated_at if object.has_attribute?(:updated_at)
+        out.updated_at ||= object.updated_at if object.respond_to?(:has_attribute?) and object.has_attribute?(:updated_at)
       end
-
+      
       out
     end
     
