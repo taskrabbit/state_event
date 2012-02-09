@@ -8,6 +8,12 @@ module StateEvent
       def default_aasm_event
         self
       end
+      def aasm_prefix= override
+        @aasm_prefix = override
+      end
+      def aasm_prefix
+        @aasm_prefix || subject.default_aasm_prefix
+      end
     end
  
     module ClassMethods

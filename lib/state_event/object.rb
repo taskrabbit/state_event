@@ -47,9 +47,15 @@ module StateEvent
           aasm_initial_state initial unless initial == :defer
           before_save :update_dynamic_state_changed_at, :if => :aasm_state_changed?
         end
-
-        include InstanceMethods
+        
+        if prefix = opts.delete(:prefix)
+          define_method(:default_aasm_prefix) do
+            prefix
+          end
+        end
+        
         @default_aasm_options = opts
+        include InstanceMethods
       end
     end
   end

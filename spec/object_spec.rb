@@ -15,7 +15,7 @@ class TestObject1 < ActiveRecord::BaseWithoutTable
   column :state_changed_at, :datetime
   column :second_state_at, :datetime
   
-  acts_as_aasm_object :first, :something => :foo
+  acts_as_aasm_object :first, :something => :foo, :prefix => "custom"
   
   aasm_state_fires :first, :something => :foo
   aasm_state_fires :second, :something => :foo
@@ -67,13 +67,14 @@ describe "Object state interactions" do
     ::StateEvent::Config.event_class = @saved_config
   end
   
-  describe "#default_aasm_event" do
+  describe "#default_aasm event and prefix" do
     it "should return itself if the state event" do
       event = TestEvent2.new
       event.default_aasm_event.should == event
     end
     it "should work on objects it's never heard of" do
       test = TestObject4.new
+      test.default_aasm_prefix.should == "test_object4"
       event = test.default_aasm_event
       event.class.should == TestEvent2
       event.subject.should == test
@@ -81,6 +82,7 @@ describe "Object state interactions" do
     end
     it "should work on objects that aren't active record" do
       test = TestObject5.new
+      test.default_aasm_prefix.should == "test_object5"
       event = test.default_aasm_event
       event.class.should == TestEvent2
       event.subject.should == test
@@ -89,10 +91,21 @@ describe "Object state interactions" do
     
     it "should return a default object" do
       test = TestObject2.new
+      test.default_aasm_prefix.should == "test_object2"
       event = test.default_aasm_event
       event.event_type.should == "test_object2"
       event.something.should == "bar"
       event.else.should == 42
+      event.subject.should == test
+    end
+  
+    it "should allow overriding of prefix" do
+      test = TestObject1.new
+      test.default_aasm_prefix.should == "custom"
+      event = test.default_aasm_event
+      event.event_type.should == "custom"
+      event.something.should == "bar"
+      event.else.should be_nil
       event.subject.should == test
     end
   

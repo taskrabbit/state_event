@@ -28,13 +28,13 @@ module StateEvent
     
     def build_event(object, opts, state)
       build_options = get_event_hash(object, opts)
-      build_options[:event_type] ||= "#{object.class.model_name.underscore}_#{state}"
+      build_options[:event_type] ||= "#{object.default_aasm_prefix}_#{state}"
       Config.event_class.new(build_options)
     end
     
     def default_event(object, opts)
       build_options = get_event_hash(object, opts)
-      build_options[:event_type] = "#{object.class.model_name.underscore}"
+      build_options[:event_type] = "#{object.default_aasm_prefix}"
       
       val = build_options.delete(:time)
       out = Config.event_class.new(build_options)

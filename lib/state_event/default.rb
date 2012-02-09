@@ -8,6 +8,11 @@ module StateEvent
       def default_aasm_event
         Util.default_event(self, {})        
       end
+      
+      def default_aasm_prefix
+        val = self.class.respond_to?(:model_name) ? self.class.model_name : self.class.name
+        val.to_s.underscore
+      end
     end
   end
 end
