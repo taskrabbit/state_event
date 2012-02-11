@@ -29,7 +29,7 @@ module StateEvent
     def build_event(object, opts, state)
       build_options = get_event_hash(object, opts)
       build_options[:event_type] ||= "#{object.default_aasm_prefix}_#{state}"
-      Config.event_class.new(build_options)
+      object.default_aasm_class.new(build_options)
     end
     
     def default_event(object, opts)
@@ -37,7 +37,7 @@ module StateEvent
       build_options[:event_type] = "#{object.default_aasm_prefix}"
       
       val = build_options.delete(:time)
-      out = Config.event_class.new(build_options)
+      out = object.default_aasm_class.new(build_options)
       
       if out.has_attribute?(:created_at)
         out.created_at = val

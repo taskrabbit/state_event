@@ -18,7 +18,10 @@ module StateEvent
  
     module ClassMethods
       def acts_as_state_event(opts={})
-        ::StateEvent::Config.event_class = self
+        unless ::StateEvent::Config.event_class
+          # if not set
+          ::StateEvent::Config.event_class = self
+        end
         
         include InstanceMethods
       end

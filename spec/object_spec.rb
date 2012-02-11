@@ -10,6 +10,16 @@ class TestEvent2 < ActiveRecord::BaseWithoutTable
   attr_accessor :subject
 end
 
+class TestEvent3 < ActiveRecord::BaseWithoutTable
+  acts_as_state_event
+  column :something, :string
+  column :event_type, :string
+  column :else, :integer
+  column :created_at, :datetime
+  
+  attr_accessor :subject
+end
+
 class TestObject1 < ActiveRecord::BaseWithoutTable
   column :state, :string
   column :state_changed_at, :datetime
@@ -34,7 +44,7 @@ class TestObject2 < ActiveRecord::BaseWithoutTable
   column :state, :string
   column :first_state_at, :datetime
   
-  acts_as_aasm_object :first, :something => :foo, :else => 42, :time => :stamp
+  acts_as_aasm_object :first, :something => :foo, :else => 42, :time => :stamp, :event_class => "TestEvent3"
   aasm_state :first
   
   def foo
@@ -93,6 +103,7 @@ describe "Object state interactions" do
       test = TestObject2.new
       test.default_aasm_prefix.should == "test_object2"
       event = test.default_aasm_event
+      event.class.should == TestEvent3
       event.event_type.should == "test_object2"
       event.something.should == "bar"
       event.else.should == 42
@@ -103,6 +114,7 @@ describe "Object state interactions" do
       test = TestObject1.new
       test.default_aasm_prefix.should == "custom"
       event = test.default_aasm_event
+      event.class.should == TestEvent2
       event.event_type.should == "custom"
       event.something.should == "bar"
       event.else.should be_nil
@@ -112,6 +124,7 @@ describe "Object state interactions" do
     it "should allow adding of times" do
       test = TestObject2.new
       event = test.default_aasm_event
+      event.class.should == TestEvent3
       event.event_type.should == "test_object2"
       event.something.should == "bar"
       event.else.should == 42

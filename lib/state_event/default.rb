@@ -13,6 +13,10 @@ module StateEvent
         val = self.class.respond_to?(:model_name) ? self.class.model_name : self.class.name
         val.to_s.underscore
       end
+      
+      def default_aasm_class
+        Config.event_class
+      end
     end
   end
 end

@@ -54,6 +54,12 @@ module StateEvent
           end
         end
         
+        if event_class = opts.delete(:event_class)
+          define_method(:default_aasm_class) do
+            event_class.constantize
+          end
+        end
+        
         @default_aasm_options = opts
         include InstanceMethods
       end
