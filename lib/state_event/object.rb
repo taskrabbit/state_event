@@ -49,13 +49,13 @@ module StateEvent
         end
         
         if prefix = opts.delete(:prefix)
-          define_method(:default_aasm_prefix) do
+          define_method(:override_default_aasm_prefix) do
             prefix
           end
         end
         
         if event_class = opts.delete(:event_class)
-          define_method(:default_aasm_class) do
+          define_method(:override_default_aasm_class) do
             event_class.constantize
           end
         end
