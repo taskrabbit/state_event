@@ -35,7 +35,7 @@ module StateEvent
           send("#{state}?")
         end
         
-        method_name = "fire_#{state}_state_after_save"
+        method_name = "fire_#{state}_state_after_commit"
         define_method(method_name) do
           created_event = Util.create_event(self, opts, state)
 
@@ -51,7 +51,7 @@ module StateEvent
           true
         end
  
-        after_save method_name, :if => if_name
+        after_commit method_name, :if => if_name
       end
     end
   end
